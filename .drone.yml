@@ -8,4 +8,7 @@ pipeline:
         repo: sierrasoftworks/drone-sentry
         tag:
             - latest
+            - "${DRONE_COMMIT_BRANCH}"
+        build_args:
+            - "VERSION=${DRONE_COMMIT_SHA}"
         secrets: [ docker_username, docker_password ]
