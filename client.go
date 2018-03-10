@@ -86,5 +86,5 @@ func (c *client) request(method, url string, payload interface{}) (interface{}, 
 }
 
 func (c *client) buildURL(paths ...string) string {
-	return path.Join(append([]string{c.Config.Server}, paths...)...) + "/"
+	return fmt.Sprintf("%s/%s", strings.TrimRight(c.Config.Server, "/"), strings.TrimLeft(path.Join(paths...)+"/", "/"))
 }
