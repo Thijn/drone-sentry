@@ -1,0 +1,11 @@
+workspace:
+    base: /go
+    path: src/github.com/SierraSoftworks/drone-sentry
+
+pipeline:
+    publish:docker:
+        image: plugins/docker
+        repo: sierrasoftworks/drone-sentry
+        tag:
+            - latest
+        secrets: [ docker_username, docker_password ]
