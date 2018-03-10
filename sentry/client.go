@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"path"
 )
 
 type Client interface {
@@ -13,13 +14,23 @@ type Client interface {
 }
 
 type client struct {
-	org     string
-	project string
-	api_key string
+	sentryServer string
+	org          string
+	project      string
+	apiKey       string
 }
 
-func NewClient(api_key string, org string, project string) Client {
-	return &client{org, project, api_key}
+func NewClient(sentryServer, apiKey, org, project string) Client {
+	if sentryServer == "" {
+		sentryServer = "https://sentry.io"
+	}
+
+	return &client{
+		sentryServer,
+		org,
+		project,
+		apiKey,
+	}
 }
 
 func (c *client) CreateRelease(msg *Release) error {
@@ -28,13 +39,13 @@ func (c *client) CreateRelease(msg *Release) error {
 	buf := bytes.NewReader(body)
 
 	req, err := http.NewRequest("POST",
-		"https://sentry.io/api/0/projects/" + c.org + "/" + c.project + "/releases/",
+		path.Join(c.sentryServer, "api/0/projects/", c.org, c.project, "releases")+"/",
 		buf)
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer " + c.api_key)
+	req.Header.Set("Authorization", "Bearer "+c.apiKey)
 
 	resp, err := http.DefaultClient.Do(req)
 
@@ -51,20 +62,19 @@ func (c *client) CreateRelease(msg *Release) error {
 	return nil
 }
 
-
 func (c *client) CreateDeploy(msg *Deploy) error {
 
 	body, _ := json.Marshal(msg)
 	buf := bytes.NewReader(body)
 
 	req, err := http.NewRequest("POST",
-		"https://sentry.io/api/0/organizations/" + c.org +
-			"/releases/" + msg.Name + "/deploys/", buf)
+		path.Join(c.sentryServer, "api/0/projects/", c.org, c.project, "releases", msg.Name, "deploys")+"/",
+		buf)
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer " + c.api_key)
+	req.Header.Set("Authorization", "Bearer "+c.apiKey)
 	resp, err := http.DefaultClient.Do(req)
 
 	if err != nil {

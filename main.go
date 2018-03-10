@@ -4,16 +4,17 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/SierraSoftworks/drone-sentry/sentry"
 	"github.com/kelseyhightower/envconfig"
-	"github.com/urbint/drone-sentry/sentry"
 )
 
 type Args struct {
-	ApiKey    string `envconfig:"sentry_auth_token"`
-	Org       string `envconfig:"sentry_organization"`
-	Project   string `envconfig:"sentry_project"`
-	Environ   string `envconfig:"sentry_release_environment"`
-	Version   string `envconfig:"sentry_release_version"`
+	Server  string `envconfig:"sentry_server"`
+	APIKey  string `envconfig:"sentry_auth_token"`
+	Org     string `envconfig:"sentry_organization"`
+	Project string `envconfig:"sentry_project"`
+	Environ string `envconfig:"sentry_release_environment"`
+	Version string `envconfig:"sentry_release_version"`
 }
 
 type DroneVars struct {
@@ -52,16 +53,16 @@ func main() {
 	}
 
 	// create the Sentry client
-	client := sentry.NewClient(vargs.ApiKey, vargs.Org, vargs.Project)
+	client := sentry.NewClient(vargs.Server, vargs.APIKey, vargs.Org, vargs.Project)
 
 	// generate the Sentry objects
 	release := sentry.Release{
 		Version: vargs.Version,
-		Ref:  "vargs.Version",
+		Ref:     "vargs.Version",
 	}
 
 	deploy := sentry.Deploy{
-		Name: vargs.Version,
+		Name:        vargs.Version,
 		Environment: vargs.Environ,
 	}
 
