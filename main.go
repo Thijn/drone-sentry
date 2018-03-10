@@ -233,4 +233,6 @@ func main() {
 
 		return nil
 	}
+
+	app.RunAndExitOnError()
 }
