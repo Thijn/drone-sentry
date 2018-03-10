@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"time"
 
 	"github.com/pkg/errors"
@@ -32,6 +33,11 @@ type ReleaseDetails struct {
 }
 
 func (c *client) NewRelease(details *ReleaseDetails) (interface{}, error) {
+	if details.DateReleased.IsZero() {
+		details.DateReleased = time.Now().UTC()
+	}
+
+	log.Println("Creating new release")
 	result, err := c.request("POST", c.buildURL("api/0/organizations", c.Config.Organization, "releases"), details)
 	if err != nil {
 		return result, errors.Wrap(err, "failed to create new release")

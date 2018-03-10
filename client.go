@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"path"
 	"strings"
@@ -41,9 +42,14 @@ func (c *client) request(method, url string, payload interface{}) (interface{}, 
 	var body *bytes.Buffer
 	if payload != nil {
 		body = bytes.NewBuffer([]byte{})
-		if err := json.NewEncoder(body).Encode(payload); err != nil {
+		enc := json.NewEncoder(body)
+		enc.SetIndent("", "  ")
+		if err := enc.Encode(payload); err != nil {
 			return nil, errors.Wrap(err, "failed to encode json request")
 		}
+
+		log.Println(body.String())
+		log.Println()
 	}
 
 	req, err := http.NewRequest(method, url, body)
@@ -79,7 +85,7 @@ func (c *client) request(method, url string, payload interface{}) (interface{}, 
 	}
 
 	if res.StatusCode >= 400 {
-		return output, errors.Errorf("request failed with status %d %s", res.StatusCode, res.Status)
+		return output, errors.Errorf("request failed with status %s", res.Status)
 	}
 
 	return output, nil

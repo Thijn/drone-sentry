@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 
 	"github.com/pkg/errors"
 	"github.com/urfave/cli"
@@ -121,12 +122,13 @@ func main() {
 			Name:   "projects",
 			Usage:  "sentry projects affected by this release",
 			EnvVar: "PLUGIN_PROJECTS",
+			Value:  &cli.StringSlice{},
 		},
 
 		cli.StringFlag{
 			Name:   "release.version",
 			Usage:  "the version of the release",
-			EnvVar: "PLUGIN_RELEASE_VERSION",
+			EnvVar: "PLUGIN_RELEASE_VERSION,PLUGIN_DEPLOY_VERSION,PLUGIN_VERSION",
 		},
 		cli.StringFlag{
 			Name:   "release.url",
@@ -154,6 +156,14 @@ func main() {
 	var client Client
 
 	app.Before = func(c *cli.Context) error {
+		if c.String("sentry.token") == "" {
+			return errors.New("must specify sentry.token")
+		}
+
+		if c.String("sentry.organization") == "" {
+			return errors.New("must specify sentry.organization")
+		}
+
 		conf := &ClientConfig{
 			Server:       c.String("sentry.server"),
 			Organization: c.String("sentry.organization"),
@@ -166,6 +176,22 @@ func main() {
 			return errors.New("must specify either release, deploy or both")
 		}
 
+		if len(StripEmptyStrings(append(c.StringSlice("projects"), c.String("project")))) == 0 {
+			return errors.New("must specify at least one project")
+		}
+
+		if c.String("commit.sha") == "" {
+			return errors.New("must specify commit sha")
+		}
+
+		if c.String("commit.ref") == "" {
+			return errors.New("must specify commit ref")
+		}
+
+		if c.String("release.version") == "" {
+			return errors.New("must specify version")
+		}
+
 		return nil
 	}
 
@@ -175,20 +201,21 @@ func main() {
 			Usage: "Creates a new release",
 			Action: func(c *cli.Context) error {
 				result, err := client.NewRelease(&ReleaseDetails{
-					Projects: StripEmptyStrings(append(c.StringSlice("projects"), c.String("project"))),
-					Version:  DefaultString(c.String("release.version"), c.String("commit.sha")),
-					Ref:      c.String("commit.ref"),
-					URL:      c.String("release.url"),
+					Projects: StripEmptyStrings(append(c.GlobalStringSlice("projects"), c.GlobalString("project"))),
+					Version:  DefaultString(c.GlobalString("release.version"), c.GlobalString("commit.sha")),
+					Ref:      c.GlobalString("commit.ref"),
+					URL:      c.GlobalString("release.url"),
 					Refs: []Ref{
 						Ref{
-							Repository:        c.String("repo"),
-							CommitSHA:         c.String("commit.sha"),
-							PreviousCommitSHA: c.String("prev.commit.sha"),
+							Repository:        c.GlobalString("repo"),
+							CommitSHA:         c.GlobalString("commit.sha"),
+							PreviousCommitSHA: c.GlobalString("prev.commit.sha"),
 						},
 					},
 				})
 
 				if result != nil {
+					log.Println("Got response:")
 					enc := json.NewEncoder(c.App.Writer)
 					enc.SetIndent("", "  ")
 					enc.Encode(result)
@@ -202,12 +229,14 @@ func main() {
 			Usage: "Creates a new deployment",
 			Action: func(c *cli.Context) error {
 				result, err := client.NewDeploy(&DeployDetails{
-					Environment: c.String("deploy.environment"),
-					Name:        c.String("deploy.name"),
-					URL:         c.String("deploy.url"),
+					Version:     c.GlobalString("release.version"),
+					Environment: c.GlobalString("deploy.environment"),
+					Name:        c.GlobalString("deploy.name"),
+					URL:         c.GlobalString("deploy.url"),
 				})
 
 				if result != nil {
+					log.Println("Got response:")
 					enc := json.NewEncoder(c.App.Writer)
 					enc.SetIndent("", "  ")
 					enc.Encode(result)
@@ -221,13 +250,13 @@ func main() {
 	app.Action = func(c *cli.Context) error {
 		if c.Bool("release") {
 			if err := c.App.Command("release").Run(c); err != nil {
-				return errors.Wrap(err, "failed to create new release")
+				return errors.Wrap(err, "task failed")
 			}
 		}
 
 		if c.Bool("deploy") {
 			if err := c.App.Command("deploy").Run(c); err != nil {
-				return errors.Wrap(err, "failed to create new deployment")
+				return errors.Wrap(err, "task failed")
 			}
 		}
 
