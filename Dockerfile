@@ -15,7 +15,7 @@ ENV GOOS=linux
 RUN go build -o bin/drone-sentry -a -installsuffix cgo -ldflags "-s -X main.version=$VERSION"
 
 FROM alpine:latest
-RUN apk-install ca-certificates
+RUN apk add --update ca-certificates
 LABEL maintainer="Sierra Softworks <admin@sierrasoftworks.com>"
 
 COPY --from=0 /go/src/github.com/SierraSoftworks/drone-sentry/bin/drone-sentry /bin/drone-sentry
