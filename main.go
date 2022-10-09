@@ -201,11 +201,11 @@ func main() {
 			Usage: "Creates a new release",
 			Action: func(c *cli.Context) error {
 				result, err := client.NewRelease(&ReleaseDetails{
-					// Projects: []Project{
-					// 	Project{
-					// 		Name: c.GlobalString("project"),
-					// 	},
-					// },
+					Projects: []Project{
+						Project{
+							Slug: c.GlobalString("project"),
+						},
+					},
 					Version: DefaultString(c.GlobalString("release.version"), c.GlobalString("commit.sha")),
 					Ref:     c.GlobalString("commit.ref"),
 					URL:     c.GlobalString("release.url"),
