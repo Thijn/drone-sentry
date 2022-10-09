@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/pkg/errors"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v1.20.0"
 )
 
 type Args struct {
