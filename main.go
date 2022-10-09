@@ -203,6 +203,7 @@ func main() {
 				result, err := client.NewRelease(&ReleaseDetails{
 					Projects: []Project{
 						Project{
+							Name: c.GlobalString("project"),
 							Slug: c.GlobalString("project"),
 						},
 					},
