@@ -7,6 +7,7 @@ ENV GO_PATH="/go"
 ADD . $GO_PATH/src/github.com/Thijn/drone-sentry
 WORKDIR $GO_PATH/src/github.com/Thijn/drone-sentry
 
+RUN apk add --update ca-certificates
 RUN go get -t ./...
 RUN go test -v ./...
 
