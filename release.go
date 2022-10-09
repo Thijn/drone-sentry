@@ -27,10 +27,10 @@ type Ref struct {
 }
 
 type ReleaseDetails struct {
-	Version      string    `json:"version"`
-	Ref          string    `json:"ref,omitempty"`
-	URL          string    `json:"url,omitempty"`
-	Projects     []Project `json:"projects"`
+	Version string `json:"version"`
+	Ref     string `json:"ref,omitempty"`
+	URL     string `json:"url,omitempty"`
+	// Projects     []Project `json:"projects"`
 	DateReleased time.Time `json:"dateReleased,omitempty"`
 	Commits      []Commit  `json:"commits,omitempty"`
 	Refs         []Ref     `json:"refs,omitempty"`
