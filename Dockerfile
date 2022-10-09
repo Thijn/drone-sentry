@@ -4,8 +4,8 @@ ARG VERSION="development"
 
 ENV GO_PATH="/go"
 
-ADD . $GO_PATH/src/github.com/SierraSoftworks/drone-sentry
-WORKDIR $GO_PATH/src/github.com/SierraSoftworks/drone-sentry
+ADD . $GO_PATH/src/github.com/Thijn/drone-sentry
+WORKDIR $GO_PATH/src/github.com/Thijn/drone-sentry
 
 RUN go get -t ./...
 RUN go test -v ./...
@@ -18,7 +18,7 @@ FROM alpine:latest
 RUN apk add --update ca-certificates
 LABEL maintainer="Sierra Softworks <admin@sierrasoftworks.com>"
 
-COPY --from=0 /go/src/github.com/SierraSoftworks/drone-sentry/bin/drone-sentry /bin/drone-sentry
+COPY --from=0 /go/src/github.com/Thijn/drone-sentry/bin/drone-sentry /bin/drone-sentry
 
 LABEL VERSION=$VERSION
 
