@@ -16,6 +16,10 @@ type Commit struct {
 	Timestamp   time.Time `json:"timestamp,omitempty"`
 }
 
+type Project struct {
+	Name string `json:"name"`
+}
+
 type Ref struct {
 	CommitSHA         string `json:"commit"`
 	Repository        string `json:"repository"`
@@ -26,7 +30,7 @@ type ReleaseDetails struct {
 	Version      string    `json:"version"`
 	Ref          string    `json:"ref,omitempty"`
 	URL          string    `json:"url,omitempty"`
-	Projects     []string  `json:"projects"`
+	Projects     []Project `json:"projects"`
 	DateReleased time.Time `json:"dateReleased,omitempty"`
 	Commits      []Commit  `json:"commits,omitempty"`
 	Refs         []Ref     `json:"refs,omitempty"`
