@@ -1,4 +1,4 @@
-FROM golang:1.9
+FROM golang:1.10
 
 ARG VERSION="development"
 
